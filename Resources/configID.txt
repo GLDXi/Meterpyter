@@ -1,2 +1,0 @@
-sudo chmod 777 -R ID/
-sudo setfacl -R -m d:u::rwx,d:g::rwx,d:o::rwx ID/
