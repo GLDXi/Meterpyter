@@ -18,7 +18,7 @@ You need a Windows Environnement to compile .py to .exe
  - pip install PyInstaller
  - PyInstaller --noconsole --onefile .\Meterpyter.py --clean
 
-Then, copy dist/Meterpyter.exe to your victim machine and double click
+Then, move ./dist/Meterpyter.exe to your victim machine and double click
 
 ### Execution 
 On your attacking machine
