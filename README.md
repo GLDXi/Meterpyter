@@ -27,6 +27,8 @@ On your attacking machine
 
 You now should have an opened reverse shell !
 
+
+
 ## Apache Configuration
 Some module wille try to contact a web server to download/upload and store information when using customized commands
 ```shell
@@ -46,6 +48,8 @@ To make your life easier, you can
 ```bash
 sudo chmod 777 -R /var/www/html/
 ```
+
+
 
 ## Usage
 First, you can type help to display the full commands menu
