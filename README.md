@@ -74,9 +74,9 @@ Some of them are not implemented yet, but you can still use :
 ## Apache Configuration
 
 Some module wille try to contact a web server to download/upload and store information when using customized commands
-'''shell
+```shell
 Ex : startransom -> GET 'key=123456' -> ransomware.php -> ...../ID/123456/key.txt
-'''
+```
 This will sends requests to the attacker web server, generating and storing the key to cryptolock the victime computer
 To be sure that you have the correct configuration, you have to :
   - Put all .zip and .ps1 file in a new **download** directory (default /var/www/html/download)
@@ -84,11 +84,11 @@ To be sure that you have the correct configuration, you have to :
   - Create a new **ransomware** directory (default ...../ransomware
     - Important : Under ransomware/ create a **ID** directory
     - apply this
-      '''bash
+      ```bash
       sudo setfacl -R -m d:u::rwx,d:g::rwx,d:o::rwx ID/
-      '''
+      ```
 To make your life easier, you can
-'''bash
+```bash
 sudo chmod 777 -R /var/www/html/
-'''
+```
 
