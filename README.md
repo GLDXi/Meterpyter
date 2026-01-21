@@ -39,6 +39,7 @@ To be sure that you have the correct configuration, you have to :
   - Put all .zip and .ps1 file in a new **download** directory (default /var/www/html/download)
   - Create a new **upload** directory (default /var/www/html/download)
   - Create a new **ransomware** directory (default ...../ransomware)
+    - In this folder, move every .php and keygen.py there
     - Important : Under ransomware/ create a **ID** directory
     - apply this
       ```bash
