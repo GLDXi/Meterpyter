@@ -87,6 +87,16 @@ Some of them are not implemented yet, but you can still use :
    - samdump
 
  - External Modules Management (Fully)
+   (modules : mimikatz, powersploit, rubeus, lazagne, kekeo, winpeas, amsi, etw)
+   - loadmodule [module] or all
+   - removemodule [module] or all
+   - runmodule
+     - mimikatz
+     - lazagne
+     - kekeo
+     - winpeas (a bit bugged)
+     - amsi (open powershell before)
+     - etw (open powershell befor)
 
  - User Control
    - getscreen
