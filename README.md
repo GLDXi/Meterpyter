@@ -94,8 +94,8 @@ Some of them are not implemented yet, but you can still use :
    - stopkeylogger
 
  - Ransomware Module
-   - startransom or startransom <path> (NOT startransomware)
-   - stopransom or stopransom <path> (NOT stopransomware)
+   - startransom or startransom ./path (NOT startransomware)
+   - stopransom or stopransom ./path (NOT stopransomware)
 
  - Open Terminal
    - Powershell
