@@ -10,7 +10,7 @@ You first need to change LHOST IP Adress in Meterpyter.py
 
 ### Using it with Python (3.14)
 Copy Meterpyter.py to your victim machine
- - pip install -r requirements
+ - pip install -r requirements.txt
  - python .\Meterpyter.py
 
 ### Using .exe
