@@ -96,7 +96,7 @@ Some of them are not implemented yet, but you can still use :
      - kekeo
      - winpeas (a bit bugged)
      - amsi (open powershell before)
-     - etw (open powershell befor)
+     - etw (open powershell before)
 
  - User Control
    - getscreen
