@@ -189,6 +189,10 @@ Post Exploitation commands:
         winget (Not implemented
 ```
 
+# DEMO #
+<img width="804" height="268" alt="image" src="https://github.com/user-attachments/assets/13fd422c-8f30-420d-a138-0935cf40135f" />
+
+
 # DISCLAIMER #
 Meterpyter is provided for educational and authorized security testing purposes only.
 
