@@ -61,6 +61,7 @@ sudo chmod 777 -R /var/www/html/
 ## Usage
 First, you can type help to display the full commands menu
 Some of them are not implemented yet, but you can still use :
+```shell
  Basic Commands:
     cd <directory> - Change directory
     cat <file> - Read a file (PowerShell)
@@ -186,5 +187,4 @@ Post Exploitation commands:
 
     Default CMD commands:
         winget (Not implemented
-
-
+```
