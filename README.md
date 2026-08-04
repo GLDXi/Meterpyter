@@ -188,3 +188,11 @@ Post Exploitation commands:
     Default CMD commands:
         winget (Not implemented
 ```
+
+# DISCLAIMER #
+Meterpyter is provided for educational and authorized security testing purposes only.
+
+By using this project, you agree to use it only on systems and networks you own or for which you have explicit permission.
+Any misuse, unauthorized access, or illegal activity is strictly prohibited.
+
+The author and contributors assume no liability and are not responsible for any damage, data loss, legal consequences, or misuse resulting from this project.
