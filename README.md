@@ -3,9 +3,15 @@ Reverse Shell made in python / Acting as a Mini Meterpreter version
 
 ## Installation / Execution
 ```shell
+sudo apt-get install apache2
 git clone https://github.com/GLDXi/Meterpyter
 cd Meterpyter
 sudo cp -R meterpyter/ /var/www/html
+cd ..
+cp /Ressources/000-default.conf /etc/apache2/sites-enabled/
+sudo a2enmod php
+
+sudo systemctl start apache2
 ```
 You first need to change LHOST IP Address in Meterpyter.py
 
