@@ -59,7 +59,7 @@ sudo chmod 777 -R /var/www/html/
 
 
 ## Usage
-First, you can type help to display the full commands menu
+First, you can type 'help' to display the full commands menu  
 Some of them are not implemented yet, but you can still use :
 ```shell
 Basic Commands:
