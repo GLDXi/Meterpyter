@@ -27,7 +27,7 @@ Then, move ./dist/Meterpyter.exe to your victim machine and double click
 ### Execution 
 On your attacking machine
 ```shell
-nc -lvnp 4444``` (or whatever port you want to change to)
+nc -lvnp 4444 (or whatever port you want to change to)
 ```
 <img width="325" height="24" alt="image" src="https://github.com/user-attachments/assets/ee18ffa9-7b33-40d7-96a7-6ccf564a5942" />
 
