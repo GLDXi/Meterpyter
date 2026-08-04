@@ -69,10 +69,10 @@ Some of them are not implemented yet, but you can still use :
 Post Exploitation commands:
     Recon & Discovery:
         sysinfo - Get system information
-        arpscan - Scan local network for devices (not implemented)
+        arpscan - Scan local network for devices
         netstat or netstat <kind> - Show network connections (kind: inet, inet4, inet6, tcp, tcp4, tcp6, udp, udp4, udp6, unix)
         listlocalusers
-        listdomainusers
+        listdomainusers (Not implemented)
         portscan [start_port] [end_port] - Scan ports on local 
         remoteportscan <target_ip> [start_port] [end_port] - Scan ports on a remote target
         
@@ -171,8 +171,8 @@ Post Exploitation commands:
         getscreen - Capture and send a screenshot
         startkeylogger - Start keylogger
         stopkeylogger - Stop keylogger
-        av on/off - Start or stop antivirus
-        fw on/off - Start or stop firewall
+        av on/off - Start or stop antivirus (Not working actually)
+        fw on/off - Start or stop firewall (Not working actually)
 
     Ransomware Module:
         startransom (default : C:/users/<currentuser>) or startransom <path> - Start ransomware encryption
@@ -183,6 +183,6 @@ Post Exploitation commands:
         cmd - Open a CMD terminal (Windows only) (not implemented)
 
     Default CMD commands:
-        winget
+        winget (Not implemented
 
 
