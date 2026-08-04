@@ -62,7 +62,7 @@ sudo chmod 777 -R /var/www/html/
 First, you can type help to display the full commands menu
 Some of them are not implemented yet, but you can still use :
 ```shell
- Basic Commands:
+Basic Commands:
     cd <directory> - Change directory
     cat <file> - Read a file (PowerShell)
     exit - Exit the shell
