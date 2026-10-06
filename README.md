@@ -73,6 +73,7 @@ First, you can type 'help' to display the full commands menu
 Some of them are not implemented yet, but you can still use :
 ```shell
 Basic Commands:
+    banner - Display the banner
     cd <directory> - Change directory
     cat <file> - Read a file (PowerShell)
     exit - Exit the shell
