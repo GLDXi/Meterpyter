@@ -107,9 +107,9 @@ Post Exploitation commands:
 
     Process & Service Management:
         ps - List running processes
-        kill <pid> - Kill a process by PID (not implemented)
-        dump <pid> - Dump process memory (not implemented)
-        migrate <pid> - Migrate to another process (not implemented)
+        kill <pid> - Kill a process by PID (not implemented yet)
+        dump <pid> - Dump process memory (not implemented yet)
+        migrate <pid> - Migrate to another process (not implemented yet)
 
     Credential Dump:
         lsadump - Dump LSA secrets
@@ -194,10 +194,10 @@ Post Exploitation commands:
 
     Open Terminal
         pwsh - Open a PowerShell terminal
-        cmd - Open a CMD terminal (Windows only) (not implemented)
+        cmd - Open a CMD terminal (Windows only) (not implemented yet)
 
     Default CMD commands:
-        winget (Not implemented
+        winget (Not implemented yet)
 ```
 
 # DEMO #
